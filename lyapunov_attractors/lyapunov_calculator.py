@@ -56,7 +56,7 @@ class LyapunovCalculator:
                 sum((r - p) ** 2 for r, p in zip(ref_point, pert_point))
             )
 
-            if 0 > separation < self.extreme_threshold:
+            if separation > 0 and separation < self.extreme_threshold:
                 lyap_sum += math.log(separation / self.lyap_norm_dist)
                 valid_points += 1
 
