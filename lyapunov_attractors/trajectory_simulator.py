@@ -3,6 +3,8 @@ import math
 import itertools
 from typing import List, Tuple
 
+from lyapunov_attractors.lyapunov_calculator import LyapunovCalculator
+
 from lyapunov_attractors.models import (
     ChaoticSysFinderConfig,
     DensityConstraints,
@@ -46,10 +48,12 @@ class TrajectorySimulator:
         calculate_new_point(point: List[float], coefficients: List[float]) -> List[float]
     """
 
-    def __init__(self, config: ChaoticSysFinderConfig):
+    def __init__(self, config: ChaoticSysFinderConfig,
+                 lyc: LyapunovCalculator):
         self.config = config
         self.density_constraints: DensityConstraints = config.density_constraints
         self.lyap_config: LyapConfig = config.lyap_config
+        self.lyap_calc: LyapunovCalculator = lyc
         self.dimensions = config.dimensions
         self.iterations = config.iterations
         self.param_max = config.max_systems
@@ -233,7 +237,8 @@ class TrajectorySimulator:
             perturbed = new_perturbed
             perturbed_traj.append(perturbed)
 
-        return float("-inf"), coefficients, reference_traj
+        lyapunov = self.lyap_calc.calculate(reference_traj, perturbed_traj)
+        return lyapunov, coefficients, reference_traj
 
     def calculate_new_point(
         self, point: List[float], coefficients: List[float]
