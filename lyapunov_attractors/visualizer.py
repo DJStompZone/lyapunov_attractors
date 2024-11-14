@@ -67,9 +67,15 @@ class Visualizer:
                                    cmap='viridis',
                                    alpha=0.6)
 
-            ax3d.set_xlabel('X')
-            ax3d.set_ylabel('Y')
-            ax3d.set_zlabel('Z')
+            ax3d.set_xlabel(
+                f'X \n[{min(points_array[:, 0]):.2f}, {max(points_array[:, 0]):.2f}]'
+            )
+            ax3d.set_ylabel(
+                f'Y \n[{min(points_array[:, 1]):.2f}, {max(points_array[:, 1]):.2f}]'
+            )
+            ax3d.set_zlabel(
+                f'Z \n[{min(points_array[:, 2]):.2f}, {max(points_array[:, 2]):.2f}]'
+            )
             ax3d.set_title(titleName)
 
             plt.colorbar(scatter,
