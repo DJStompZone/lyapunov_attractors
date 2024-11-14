@@ -1,0 +1,9 @@
+dist/
+__pycache__/
+poetry_cache/
+poetry_env/
+*.pyc
+*.pyo
+systems.json
+best_attractors/
+chaotic_solver_config.json

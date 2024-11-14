@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "lyapunov-attractors"
+version = "0.2.0"
+description = "Python project for generating and visualizing Lyapunov attractors using matplotlib and numpy"
+authors = [
+    "SpectMeOW <126259962+SpcFORK@users.noreply.github.com>",
+    "DJ Stomp <85457381+DJStompZone@users.noreply.github.com>"
+]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<4.0"
+matplotlib = "^3.9.2"
+numpy = "^2.1.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
