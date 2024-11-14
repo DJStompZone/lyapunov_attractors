@@ -36,7 +36,7 @@ class ChaoticSystemFinder:
         self.lyap_config: LyapConfig = self.config.lyap_config
         self.storage_manager = StorageManager(self.config.output_path)
         self.lyap_calculator = LyapunovCalculator(self.config.lyap_config)
-        self.simulator = TrajectorySimulator(config)
+        self.simulator = TrajectorySimulator(config, self.lyap_calculator)
         self.visualizer = Visualizer(Path("./best_attractors"))
         self.best_systems: List[AttractorSystem] = self.storage_manager.load_systems()
 
