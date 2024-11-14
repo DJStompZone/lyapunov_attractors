@@ -3,45 +3,49 @@ import math
 import itertools
 from typing import List, Tuple
 
-from lyapunov_attractors.models import ChaoticSysFinderConfig, DensityConstraints, LyapConfig
+from lyapunov_attractors.models import (
+    ChaoticSysFinderConfig,
+    DensityConstraints,
+    LyapConfig,
+)
+
 
 class TrajectorySimulator:
     """
-    A class to simulate trajectories for Lyapunov attractors.
+    TrajectorySimulator is a class designed to simulate the trajectory of points in a chaotic system.
+    It generates random points, computes polynomial terms, normalizes points, checks for convergence,
+    and simulates the trajectory over a number of iterations.
 
     Attributes:
-        dimensions (int): Number of dimensions for the simulation.
-        iterations (int): Number of iterations to run the simulation.
-        PARAM_MAX (float): Maximum value for polynomial coefficients.
-        DENSITY_MIN (float): Minimum density constraint.
-        DENSITY_MAX (float): Maximum density constraint.
-        convergence_threshold (float): Threshold for convergence.
-        extreme_threshold (float): Threshold for extreme values.
-        lyap_norm_dist (float): Normalization distance for Lyapunov separation.
-        lyap_renorm_steps (int): Steps interval for renormalizing the separation.
+        config (ChaoticSysFinderConfig): Configuration object containing various settings for the simulation.
+        density_constraints (DensityConstraints): Constraints for the density range of the points.
+        lyap_config (LyapConfig): Configuration for the Lyapunov exponent calculation.
+        dimensions (int): Number of dimensions for the points.
+        iterations (int): Number of iterations for the simulation.
+        param_max (float): Maximum value for the polynomial coefficients.
+        min_density (float): Minimum density value.
+        max_density (float): Maximum density value.
+        convergence_threshold (float): Threshold for determining convergence.
+        extreme_threshold (float): Threshold for determining divergence.
+        lyap_norm_dist (float): Initial separation distance for Lyapunov exponent calculation.
+        lyap_renorm_steps (int): Number of steps after which the separation is renormalized.
 
     Methods:
-        create_random_points() -> Tuple[List[float], List[float]]:
-            Creates a random point and a perturbed point with initial separation.
+        create_random_points() -> Tuple[List[float], List[float]]
 
-        generate_polynomial_coefficients() -> List[float]:
-            Generates random polynomial coefficients for the simulation.
+        generate_polynomial_coefficients() -> List[float]
 
-        compute_polynomial_terms(point: List[float], dim_coeffs: List[float]) -> float:
-            Computes the polynomial terms for a given point and dimension coefficients.
+        compute_polynomial_terms(point: List[float], dim_coeffs: List[float]) -> float
 
-        normalize_point(point: List[float]) -> List[float]:
-            Normalizes a point to ensure it does not exceed the maximum density.
+        normalize_point(point: List[float]) -> List[float]
 
-        check_convergence(point: List[float]) -> bool:
-            Checks if a point has converged based on the magnitude.
+        check_convergence(point: List[float]) -> bool
 
-        simulate() -> Tuple[float, List[float], List[List[float]]]:
-            Runs the trajectory simulation and returns the Lyapunov exponent, coefficients, and reference trajectory.
+        simulate() -> Tuple[float, List[float], List[List[float]]]
 
-        calculate_new_point(point: List[float], coefficients: List[float]) -> List[float]:
-            Calculates a new point based on the current point and polynomial coefficients.
+        calculate_new_point(point: List[float], coefficients: List[float]) -> List[float]
     """
+
     def __init__(self, config: ChaoticSysFinderConfig):
         self.config = config
         self.density_constraints: DensityConstraints = config.density_constraints
@@ -93,20 +97,24 @@ class TrajectorySimulator:
         The total number of parameters is then:
         coeffs_per_dim * dimensions
 
-        Each coefficient is a random float uniformly distributed between 
+        Each coefficient is a random float uniformly distributed between
         -PARAM_MAX / 2 and PARAM_MAX / 2.
 
         Returns:
             List[float]: A list of randomly generated polynomial coefficients.
         """
-        coeffs_per_dim = 1 + self.dimensions + (self.dimensions * (self.dimensions + 1)) // 2
+        coeffs_per_dim = (
+            1 + self.dimensions + (self.dimensions * (self.dimensions + 1)) // 2
+        )
         total_params = coeffs_per_dim * self.dimensions
         return [
             random.uniform(-self.param_max / 2, self.param_max / 2)
             for _ in range(total_params)
         ]
 
-    def compute_polynomial_terms(self, point: List[float], dim_coeffs: List[float]) -> float:
+    def compute_polynomial_terms(
+        self, point: List[float], dim_coeffs: List[float]
+    ) -> float:
         """
         Computes the polynomial terms for a given point using the provided dimension coefficients.
 
@@ -138,14 +146,16 @@ class TrajectorySimulator:
                     current_idx += 1
 
             # Quadratic terms
-            for i, j in itertools.combinations_with_replacement(range(self.dimensions), 2):
+            for i, j in itertools.combinations_with_replacement(
+                range(self.dimensions), 2
+            ):
                 if current_idx < len(dim_coeffs):
                     result += dim_coeffs[current_idx] * point[i] * point[j] * 0.25
                     current_idx += 1
 
             return result
         except OverflowError:
-            return float('inf') # Oopsiepoopsie, terms 2 stronk
+            return float("inf")  # Oopsiepoopsie, terms 2 stronk
 
     def normalize_point(self, point: List[float]) -> List[float]:
         """
@@ -170,12 +180,14 @@ class TrajectorySimulator:
             point (List[float]): A list of float values representing the coordinates of the point.
 
         Returns:
-            bool: True if the magnitude of the point is greater than the extreme threshold 
-                  or less than the convergence threshold, indicating divergence or convergence, 
+            bool: True if the magnitude of the point is greater than the extreme threshold
+                  or less than the convergence threshold, indicating divergence or convergence,
                   respectively. False otherwise.
         """
         magnitude = math.sqrt(sum(x * x for x in point))
-        return magnitude > self.extreme_threshold or magnitude < self.convergence_threshold
+        return (
+            magnitude > self.extreme_threshold or magnitude < self.convergence_threshold
+        )
 
     def simulate(self) -> Tuple[float, List[float], List[List[float]]]:
         """
@@ -196,14 +208,14 @@ class TrajectorySimulator:
             # Update reference trajectory
             new_point = self.calculate_new_point(point, coefficients)
             if self.check_convergence(new_point):
-                return float('-inf'), coefficients, reference_traj
+                return float("-inf"), coefficients, reference_traj
             point = new_point
             reference_traj.append(point)
 
             # Update perturbed trajectory
             new_perturbed = self.calculate_new_point(perturbed, coefficients)
             if self.check_convergence(new_perturbed):
-                return float('-inf'), coefficients, reference_traj
+                return float("-inf"), coefficients, reference_traj
 
             # Periodically renormalize the separation
             if iteration % self.lyap_renorm_steps == 0 and iteration > 0:
@@ -221,9 +233,11 @@ class TrajectorySimulator:
             perturbed = new_perturbed
             perturbed_traj.append(perturbed)
 
-        return float('-inf'), coefficients, reference_traj
+        return float("-inf"), coefficients, reference_traj
 
-    def calculate_new_point(self, point: List[float], coefficients: List[float]) -> List[float]:
+    def calculate_new_point(
+        self, point: List[float], coefficients: List[float]
+    ) -> List[float]:
         """
         Calculate a new point in the trajectory based on the given point and coefficients.
 
@@ -239,7 +253,7 @@ class TrajectorySimulator:
 
         for dim in range(self.dimensions):
             start_idx = dim * coeffs_per_dim
-            dim_coeffs = coefficients[start_idx:start_idx + coeffs_per_dim]
+            dim_coeffs = coefficients[start_idx : start_idx + coeffs_per_dim]
             new_coord = self.compute_polynomial_terms(point, dim_coeffs)
             new_point.append(new_coord)
 
