@@ -50,9 +50,12 @@ class Visualizer:
         """
         points_array = np.array(system.points)
 
+        pretty_coefs = ",\n".join(", ".join(f"{system.coefficients[i+j]}"
+                                        for j in range(3))
+                              for i in range(0, len(system.coefficients), 3))
         titleName = (
-            f'{system.dimensions}D: {system.coefficients[0:system.dimensions]}'
-            + f'\nInitPos: {system.points[0]}' +
+            f'{system.dimensions}D: [{pretty_coefs}]' +
+            f'\nInitPos: {system.points[0]}' +
             f'\nLyapunov: {system.lyapunov:.3f}' +
             f'\nTime: {datetime.strptime(system.timestamp, "%Y%m%d_%H%M%S").strftime("%Y-%m-%d %H:%M:%S")}'
         )
