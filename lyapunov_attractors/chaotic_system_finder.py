@@ -133,12 +133,11 @@ class ChaoticSystemFinder:
 
                 print("Current best systems:")
                 for idx, system in enumerate(self.best_systems, 1):
-                    vxlen = min(len(system.points[0]), system.dimensions)
                     print(
                         f"{idx}. " +
                         f"{Fore.LIGHTYELLOW_EX}Lyapunov: {system.lyapunov:.3f}{Fore.RESET} "
                         +
                         f"(found: {Fore.CYAN}{system.timestamp}{Fore.RESET})\n"
                         +
-                        f'{Fore.RED}C   {system.coefficients[0:vxlen]}{Fore.RESET}\n'
+                        f'{Fore.RED}C   {system.coefficients[0:system.param_count]}{Fore.RESET}\n'
                         + f'{Fore.BLUE}Vx  {system.points[0]}{Fore.RESET}\n')
